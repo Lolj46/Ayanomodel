@@ -50,14 +50,21 @@ jobs:
       - name: Build studiomdl
         run: |
           set -euo pipefail
+
           SDK="$GITHUB_WORKSPACE/source-sdk-2013/sp"
-          mkdir -p "$SDK/game/bin"
-          docker pull registry.gitlab.steamos.cloud/steamrt/scout/sdk
+          IMAGE="registry.gitlab.steamos.cloud/steamrt/scout/sdk"
+
+          podman pull "$IMAGE:latest"
+          podman tag "$IMAGE:latest" "$IMAGE"
+
           cd studiomdl-linux
+
           ./scripts/check_deps.sh "$SDK"
           ./scripts/apply_to_sdk.sh "$SDK"
           ./scripts/build.sh "$SDK"
+
           test -x "$SDK/game/bin/studiomdl"
+
           echo "STUDIOMDL=$SDK/game/bin/studiomdl" >> "$GITHUB_ENV"
 
       - name: Inspect model sources
@@ -69,10 +76,19 @@ jobs:
       - name: Compile model
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/game/models" "$RUNNER_TEMP/game/materials"
+
+          mkdir -p "$RUNNER_TEMP/game/models"
+          mkdir -p "$RUNNER_TEMP/game/materials"
+
           cp -a "$MODEL/materials/." "$RUNNER_TEMP/game/materials/"
+
           cd "$MODEL/modelsrc"
-          "$STUDIOMDL" -game "$RUNNER_TEMP/game" -nop4 ayanokoji.qc 2>&1 | tee "$RUNNER_TEMP/compile.log"
+
+          "$STUDIOMDL" \
+            -game "$RUNNER_TEMP/game" \
+            -nop4 \
+            ayanokoji.qc \
+            2>&1 | tee "$RUNNER_TEMP/compile.log"
 
       - name: Upload build logs
         if: always()
@@ -82,7 +98,7 @@ jobs:
           path: ${{ runner.temp }}/compile.log
           if-no-files-found: ignore
 
-      - name: Upload compiled files
+      - name: Upload compiled model
         if: success()
         uses: actions/upload-artifact@v4
         with:
