@@ -112,13 +112,8 @@ jobs:
           }
           EOF
 
-          echo "=== Compiler ==="
-          ls -l "$STUDIOMDL"
-
-          echo "=== SteamAppData location ==="
-          ls -l "$CONFIG/SteamAppData.vdf"
-
-          echo "=== SteamAppData content ==="
+          echo "=== Steam configuration ==="
+          ls -la "$CONFIG"
           cat "$CONFIG/SteamAppData.vdf"
 
       - name: Prepare game directory
@@ -174,12 +169,25 @@ jobs:
         run: |
           set -euo pipefail
 
-          cd "$MODEL/modelsrc"
+          CONFIG="$SDK/game/bin/config"
+          mkdir -p "$CONFIG"
+
+          cd "$SDK/game/bin"
+
+          echo "=== Working directory ==="
+          pwd
+
+          echo "=== Compiler ==="
+          ls -l "$STUDIOMDL"
+
+          echo "=== Steam configuration ==="
+          ls -la config/
+          cat config/SteamAppData.vdf
 
           "$STUDIOMDL" \
             -game "$GAME" \
             -nop4 \
-            ayanokoji.qc \
+            "$MODEL/modelsrc/ayanokoji.qc" \
             2>&1 | tee "$RUNNER_TEMP/compile.log"
 
           echo "=== Compiled model files ==="
