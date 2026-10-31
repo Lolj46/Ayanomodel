@@ -96,26 +96,29 @@ jobs:
           set -euo pipefail
 
           CONFIG="$SDK/game/bin/config"
-
           mkdir -p "$CONFIG"
 
           cat > "$CONFIG/SteamAppData.vdf" <<'EOF'
           "SteamAppData"
           {
               "RememberPassword" "0"
-              "AutoLoginUser" "build"
-              "build"
+              "AutoLoginUser" "CSM"
+              "CSM"
               {
-                  "User" "build"
+                  "User" "CSM"
                   "AccountCreated" "1"
                   "ShowNotifyTrayHintDialog" "0"
               }
           }
           EOF
 
-          test -f "$CONFIG/SteamAppData.vdf"
+          echo "=== Compiler ==="
+          ls -l "$STUDIOMDL"
 
-          echo "=== SteamAppData configuration ==="
+          echo "=== SteamAppData location ==="
+          ls -l "$CONFIG/SteamAppData.vdf"
+
+          echo "=== SteamAppData content ==="
           cat "$CONFIG/SteamAppData.vdf"
 
       - name: Prepare game directory
